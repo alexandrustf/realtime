@@ -1,9 +1,9 @@
-const DynamoDBService = require('./service/dynamodbService');
+import { DynamoDBService } from "./services/dynamoDBService";
 
 const fileMetadataTableName = process.env.FILE_METADATA_TABLE_NAME || '';
 const dbService = new DynamoDBService(fileMetadataTableName);
 
-exports.handler = async (event) => {
+exports.handler = async (event: any) => {
     const { fileId } = event.pathParameters;
     const version = event.pathParameters.version ? parseInt(event.pathParameters.version) : null;
 

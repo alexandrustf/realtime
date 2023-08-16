@@ -1,0 +1,16 @@
+{
+  "name": "functions",
+  "version": "1.0.0",
+  "main": "delete-data.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.119",
+    "@types/node": "^20.5.0",
+    "typescript": "^5.1.6"
+  },
+  "description": ""
+}
