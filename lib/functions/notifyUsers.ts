@@ -1,7 +1,7 @@
-const DynamoDBService = require('./service/dynamodbService');
+import { DynamoDBService } from "./services/dynamoDBService";
 
 const USER_SUBSCRIPTION_TABLE_NAME = process.env.USER_SUBSCRIPTION_TABLE_NAME || '';
-const USER_ID_SUBSCRIPTION_INDEX_NAME = process.env.USER_ID_SUBSCRIPTION_INDEX_NAME || 'UserIdSubscriptionIndex';
+const USER_ID_SUBSCRIPTION_INDEX_NAME: string = process.env.USER_ID_SUBSCRIPTION_INDEX_NAME || 'UserIdSubscriptionIndex';
 const dbService = new DynamoDBService(USER_SUBSCRIPTION_TABLE_NAME);
 
 exports.handler = async (event) => {
@@ -10,11 +10,11 @@ exports.handler = async (event) => {
             if (record.eventName === 'INSERT') { // Only process new files
                 const fileId = record.dynamodb.NewImage.fileId.S;
 
-                const result = await dbService.query('fileId = :fileId', {
+                const result: any = await dbService.query('fileId = :fileId', {
                     ':fileId': fileId
                     }, USER_ID_SUBSCRIPTION_INDEX_NAME);
-
-                await notifyUsers(result.Items);
+                if(result.Items)
+                    await notifyUsers(result.Items, fileId);
             }
         }
     } catch (error) {
@@ -23,7 +23,7 @@ exports.handler = async (event) => {
     }
 };
 
-async function notifyUsers(users) {
+async function notifyUsers(users, fileId) {
     console.log({users});
     for (const user of users) {
         console.log(`Notify user ${user.userId} about new file ${fileId}`);

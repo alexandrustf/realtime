@@ -1,4 +1,5 @@
-const { String, Record } = require("runtypes");
+import { String, Record } from "runtypes";
+import { DynamoDBService } from "./services/dynamoDBService";
 
 const fileMetadataTableName = process.env.FILE_METADATA_TABLE_NAME || '';
 const dbService = new DynamoDBService(fileMetadataTableName);
@@ -7,7 +8,7 @@ const ItemRuntype = Record({
     fileId: String,
     version: String,
     user: String,
-    data: Any,
+    data: String,
 });
 
 exports.handler = async (event) => {
@@ -22,7 +23,7 @@ exports.handler = async (event) => {
     }
 
     try {
-        const result = await dbService.putItem(item);
+        const result: any = await dbService.putItem(item);
         return {
             statusCode: 200,
             body: "Data inserted successfully"

@@ -8,7 +8,9 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "deploy:api:windows": "cd lib/functions && rmdir /s /q dist && npx tsc && xcopy /E /I node_modules/ ../dist/node_modules/ && cd ../.. && cdk deploy ApiStack",
+    "deploy:api": "cd lib/functions && rmdir /s /q dist && npx tsc && cp -R node_modules/ ../dist/node_modules/ && cd ../.. && cdk deploy ApiStack" 
   },
   "devDependencies": {
     "@types/jest": "^29.5.3",

@@ -1,4 +1,4 @@
-import { DynamoDBClient, GetItemCommand, PutItemCommand, UpdateItemCommand, DeleteItemCommand, ScanCommand, QueryCommand, QueryCommandInput } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, GetItemCommand, PutItemCommand, UpdateItemCommand, DeleteItemCommand, ScanCommand, QueryCommand, QueryCommandInput, UpdateItemCommandInput, ScanCommandOutput, AttributeValue } from "@aws-sdk/client-dynamodb";
 
 export class DynamoDBService {
   tableName: string;
@@ -8,18 +8,16 @@ export class DynamoDBService {
     this.client = new DynamoDBClient({});
   }
 
-async getItem(key: string) {
-    const params = {
+async getItem(key) {
+    const response = await this.client.send(new GetItemCommand({
         TableName: this.tableName,
         Key: key
-    };
-
-    const response = await this.client.send(new GetItemCommand(params));
+    }));
     return response.Item;
 }
 
 async putItem(item) {
-    const params = {
+    const params: any = {
         TableName: this.tableName,
         Item: item
     };
@@ -27,8 +25,8 @@ async putItem(item) {
     return await this.client.send(new PutItemCommand(params));
 }
 
-async updateItem(key: string, updateExpression, expressionAttributeValues) {
-    const params = {
+async updateItem(key, updateExpression, expressionAttributeValues) {
+    const params: UpdateItemCommandInput = {
         TableName: this.tableName,
         Key: key,
         UpdateExpression: updateExpression,
@@ -40,7 +38,7 @@ async updateItem(key: string, updateExpression, expressionAttributeValues) {
 }
 
 async deleteItem(key: string) {
-    const params = {
+    const params: any = {
         TableName: this.tableName,
         Key: key
     };
@@ -48,8 +46,8 @@ async deleteItem(key: string) {
     return await this.client.send(new DeleteItemCommand(params));
 }
 
-async scan(filterExpression, expressionAttributeValues) {
-    const params = {
+async scan(filterExpression = undefined, expressionAttributeValues = undefined) {
+    const params: any = {
         TableName: this.tableName,
         FilterExpression: filterExpression,
         ExpressionAttributeValues: expressionAttributeValues
@@ -59,7 +57,7 @@ async scan(filterExpression, expressionAttributeValues) {
     return response.Items;
 }
 
-async query(keyConditionExpression, expressionAttributeValues, indexName = null) {
+async query(keyConditionExpression, expressionAttributeValues, indexName: string | undefined = undefined) {
     const params: QueryCommandInput = {
         TableName: this.tableName,
         KeyConditionExpression: keyConditionExpression,
@@ -75,7 +73,7 @@ async query(keyConditionExpression, expressionAttributeValues, indexName = null)
 }
 
 async getItemsWithVersionGreaterThan(fileId, version) {
-    const params = {
+    const params: any = {
         TableName: this.tableName,
         KeyConditionExpression: "fileId = :fileId AND version > :version",
         ExpressionAttributeValues: {
