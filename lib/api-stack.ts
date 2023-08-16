@@ -73,24 +73,27 @@ export class ApiStack extends Stack {
         code: Code.fromAsset(path.join(__dirname, 'functions')),
     });
 
-    const data = api.root.addResource('data');
-
-    data.addMethod(
+    const filesResource = api.root.addResource('files');
+    const fileIdResource = filesResource.addResource('{fileId}');
+    fileIdResource.addMethod('GET', new apigw.LambdaIntegration(getDataLambda));
+    const versionResource = fileIdResource.addResource('{version}');
+    versionResource.addMethod('GET', new apigw.LambdaIntegration(getDataLambda));
+    filesResource.addMethod(
       'GET',
       new apigw.LambdaIntegration(getDataLambda, {proxy: true}),
     );
 
-    data.addMethod(
+    filesResource.addMethod(
       'POST',
       new apigw.LambdaIntegration(insertDataLambda, {proxy: true}),
     );
 
-    data.addMethod(
+    fileIdResource.addMethod(
       'PUT',
       new apigw.LambdaIntegration(updateDataLambda, {proxy: true}),
     );
 
-    data.addMethod(
+    fileIdResource.addMethod(
       'DELETE',
       new apigw.LambdaIntegration(deleteDataLambda, {proxy: true}),
     );

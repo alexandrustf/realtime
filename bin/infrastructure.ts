@@ -12,9 +12,7 @@ const databaseStack = new DatabaseStack(app, 'DatabaseStack', {
   },
 });
 
-new ApiStack(app, 'ApiStack', {
-
-});
+new ApiStack(app, 'ApiStack', {});
 
 
 /* If you don't specify 'env', this stack will be environment-agnostic.

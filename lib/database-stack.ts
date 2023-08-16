@@ -44,6 +44,8 @@ export class DatabaseStack extends Stack {
       startingPosition: StartingPosition.TRIM_HORIZON
     }));
 
+    userSubscriptionTable.grantReadWriteData(notifyUsersLambda);
+
     new CfnOutput(this, 'FileMetadataTableName', {
       value: fileMetadataTable.tableName,
       exportName: 'FileMetadataTableName',
