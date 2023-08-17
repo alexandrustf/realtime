@@ -13,14 +13,14 @@ exports.handler = async (event: any) => {
     if (!fileId || !userId) {
         return {
             statusCode: 400,
-            body: "Invalid request parameters"
+            body: "Invalid request parameters, missing: fieldId or userId"
         };
     }
 
     try {
         await userDbService.putItem({
             userId: userId,
-            fileId: fileId
+            fileId: fileId,
         });
 
         return {

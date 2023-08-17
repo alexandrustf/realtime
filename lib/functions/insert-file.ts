@@ -26,12 +26,13 @@ exports.handler = async (event: any) => {
     }
 
     try {
-        await fileDbService.putItem({
+        const insertItem = {
             fileId: item.fileId,
-            version: 0,
+            version: 1,
             userId: item.userId, // Extract userId from the request (this could be from a JWT token, Cognito, etc.)  Here's a placeholder assuming it's in the request body for simplicity
             data: item.data
-        });
+        };
+        await fileDbService.putItem(insertItem);
 
         await userDbService.putItem({
             userId: item.userId,
@@ -40,7 +41,7 @@ exports.handler = async (event: any) => {
 
         return {
             statusCode: 200,
-            body: "Data inserted successfully"
+            body: JSON.stringify(insertItem),
         };
     } catch (err) {
         console.error("Error inserting data:", err);

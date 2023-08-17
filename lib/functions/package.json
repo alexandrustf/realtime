@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy:api": "cd .. && rmdir /s /q dist && npx tsc && cp -R node_modules ../dist/node_modules && cd ../.. && cdk deploy ApiStack",
-    "deploy:api:windows": "rmdir /s /q \"../dist\" && npx tsc && xcopy /E /I /Q node_modules \"../dist/node_modules\" && cd ../.. && cdk deploy ApiStack && cd lib/functions",
+    "deploy:api:windows": "rmdir /s /q ../dist && npx tsc && xcopy /E /I /Q node_modules ../dist/node_modules && cd ../.. && cdk deploy ApiStack && cd lib/functions",
     "deploy:database:windows": "rmdir /s /q \"../dist\" && npx tsc && xcopy /E /I /Q node_modules \"../dist/node_modules\" && cd ../.. && cdk deploy DatabaseStack && cd lib/functions"
   },
   "author": "",
@@ -18,7 +18,9 @@
   "description": "",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.391.0",
+    "@aws-sdk/client-sns": "^3.391.0",
     "@aws-sdk/util-dynamodb": "^3.391.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "runtypes": "^6.7.0"
   }
 }

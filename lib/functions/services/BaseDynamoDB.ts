@@ -23,6 +23,7 @@ export class BaseDynamoDB {
         TableName: this.tableName,
         Item: marshall(item)
     };
+    console.log(params);
 
     return await this.client.send(new PutItemCommand(params));
   }
@@ -59,36 +60,7 @@ export class BaseDynamoDB {
     return response.Items?.map(i => unmarshall(i));
   }
 
-  // async query(keyConditionExpression, expressionAttributeValues, indexName: string | undefined = undefined) {
-  //   console.log("query");
-  //   const params: QueryCommandInput = {
-  //       TableName: this.tableName,
-  //       KeyConditionExpression: keyConditionExpression,
-  //       ExpressionAttributeValues: expressionAttributeValues
-  //   };
-
-  //   console.log({params});
-
-  //   if (indexName) {
-  //       params.IndexName = indexName;
-  //   }
-
-  //   const response = await this.client.send(new QueryCommand(params));
-  //   console.log(response)
-  //   return response.Items?.map(i => unmarshall(i));
-  // }
-
-  async query(fileId: string, version?: number, indexName?: string): Promise<any[] | undefined> {
-    let keyConditionExpression = "fileId = :fileId";
-    let expressionAttributeValues: { [key: string]: AttributeValue } = {
-        ":fileId": { S: fileId }
-    };
-
-    if (version !== undefined) {
-        keyConditionExpression += " AND version > :version";
-        expressionAttributeValues[":version"] = { N: version.toString() };
-    }
-
+  async query(keyConditionExpression, expressionAttributeValues, indexName: string | undefined = undefined) {
     const params: QueryCommandInput = {
         TableName: this.tableName,
         KeyConditionExpression: keyConditionExpression,
@@ -99,12 +71,7 @@ export class BaseDynamoDB {
         params.IndexName = indexName;
     }
 
-    try {
-        const response = await this.client.send(new QueryCommand(params));
-        return response.Items?.map(i => unmarshall(i));
-    } catch (error) {
-        console.error("Error during DynamoDB query:", error);
-        throw error;
-    }
+    const response = await this.client.send(new QueryCommand(params));
+    return response.Items?.map(i => unmarshall(i));
 }
 }

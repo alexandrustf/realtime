@@ -4,6 +4,7 @@ import path = require('path');
 import { Construct } from 'constructs';
 import { Code, Runtime, Function, StartingPosition } from 'aws-cdk-lib/aws-lambda';
 import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { Topic } from 'aws-cdk-lib/aws-sns';
 
 export class DatabaseStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -13,7 +14,7 @@ export class DatabaseStack extends Stack {
       partitionKey: { name: 'fileId', type: AttributeType.STRING },
       sortKey: { name: 'version', type: AttributeType.NUMBER },
       tableName: 'FileMetadata',
-      stream: StreamViewType.NEW_IMAGE,  // Stream new data when an item is added
+      stream: StreamViewType.NEW_AND_OLD_IMAGES,
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
@@ -30,19 +31,25 @@ export class DatabaseStack extends Stack {
       sortKey: { name: 'userId', type: AttributeType.STRING },
     });
 
+    const fileUpdateTopic = new Topic(this, 'FileUpdateTopic', {
+      displayName: 'File Update Notifications',
+      topicName: 'FileUpdateNotifications'
+  });
     const notifyUsersLambda = new Function(this, 'notifyUsersLambda', {
       runtime: Runtime.NODEJS_16_X, 
       environment: {
           FILE_METADATA_TABLE_NAME: fileMetadataTable.tableName,
           USER_SUBSCRIPTION_TABLE_NAME: userSubscriptionTable.tableName,
+          SNS_TOPIC_ARN: fileUpdateTopic.topicArn,
       },
       code: Code.fromAsset(path.join(__dirname, 'functions')),
-      handler: "notifyUsers.handler",
+      handler: "notify-users.handler",
     });
-
     notifyUsersLambda.addEventSource(new DynamoEventSource(fileMetadataTable, {
       startingPosition: StartingPosition.TRIM_HORIZON
     }));
+    fileUpdateTopic.grantPublish(notifyUsersLambda);
+
 
     userSubscriptionTable.grantReadWriteData(notifyUsersLambda);
 

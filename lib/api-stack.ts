@@ -2,7 +2,7 @@ import * as apigw from 'aws-cdk-lib/aws-apigateway';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Code } from 'aws-cdk-lib/aws-lambda';
-import { CfnOutput, Fn, Stack, StackProps } from 'aws-cdk-lib/core';
+import { CfnOutput, Duration, Fn, Stack, StackProps } from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
 import path = require('path');
 
@@ -12,6 +12,7 @@ export class ApiStack extends Stack {
     const fileMetadataTableName = Fn.importValue('FileMetadataTableName');
     const userSubscriptionTableName = Fn.importValue('UserSubscriptionTableName');
     const importedFileMetadataTable = Table.fromTableName(this, 'ImportedFileMetadataTable', fileMetadataTableName);
+    const userSubscriptionTable = Table.fromTableName(this, 'ImportedUserSubscriptionTableName', userSubscriptionTableName);
 
     const api = new apigw.RestApi(this, `SyncDataApiGateway`, {
         restApiName: `SyncData-api`,
@@ -33,18 +34,22 @@ export class ApiStack extends Stack {
             allowOrigins: ['http://localhost:3000'],
           },
       });
-    const insertDataLambda = new lambda.Function(this, 'insert-file-lambda', {
-        runtime: lambda.Runtime.NODEJS_16_X, 
+    const insertFileLambda = new lambda.Function(this, 'insert-file-lambda', {
+        runtime: lambda.Runtime.NODEJS_16_X,
+        timeout: Duration.seconds(29),
         environment: {
             FILE_METADATA_TABLE_NAME: fileMetadataTableName,
+            USER_SUBSCRIPTION_TABLE_NAME: userSubscriptionTableName,
         },
         handler: 'insert-file.handler',
         code: Code.fromAsset(path.join(__dirname, 'dist')),
     });
-    importedFileMetadataTable.grantReadWriteData(insertDataLambda);
+    importedFileMetadataTable.grantReadWriteData(insertFileLambda);
+    userSubscriptionTable.grantReadWriteData(insertFileLambda);
 
     const updateFileLambda = new lambda.Function(this, 'update-file-lambda', {
-        runtime: lambda.Runtime.NODEJS_16_X, 
+        runtime: lambda.Runtime.NODEJS_16_X,
+        timeout: Duration.seconds(29), 
         environment: {
             FILE_METADATA_TABLE_NAME: fileMetadataTableName,
         },
@@ -54,9 +59,10 @@ export class ApiStack extends Stack {
     importedFileMetadataTable.grantReadWriteData(updateFileLambda);
 
     const getAllFilesLambda = new lambda.Function(this, 'get-all-files-lambda', {
-      runtime: lambda.Runtime.NODEJS_16_X, 
+      runtime: lambda.Runtime.NODEJS_16_X,
+      timeout: Duration.seconds(29), 
       environment: {
-          FILE_METADATA_TABLE_NAME: fileMetadataTableName,
+            FILE_METADATA_TABLE_NAME: fileMetadataTableName,
       },
       handler: 'get-all-files.handler',
       code: Code.fromAsset(path.join(__dirname, 'dist')),
@@ -64,7 +70,8 @@ export class ApiStack extends Stack {
     importedFileMetadataTable.grantReadData(getAllFilesLambda);
 
     const getDataLambda = new lambda.Function(this, 'get-file-lambda', {
-        runtime: lambda.Runtime.NODEJS_16_X, 
+        runtime: lambda.Runtime.NODEJS_16_X,
+        timeout: Duration.seconds(29), 
         environment: {
             FILE_METADATA_TABLE_NAME: fileMetadataTableName,
         },
@@ -73,9 +80,9 @@ export class ApiStack extends Stack {
     });
     importedFileMetadataTable.grantReadData(getDataLambda);
 
-    // Please write the lambda function for delete-data.ts as well. /files/{fileId} but only if the file was created 
     const deleteDataLambda = new lambda.Function(this, 'delete-data-lambda', {
-        runtime: lambda.Runtime.NODEJS_16_X, 
+        runtime: lambda.Runtime.NODEJS_16_X,
+         timeout: Duration.seconds(29), 
         environment: {
             FILE_METADATA_TABLE_NAME: fileMetadataTableName,
         },
@@ -85,14 +92,16 @@ export class ApiStack extends Stack {
     importedFileMetadataTable.grantReadWriteData(deleteDataLambda);
 
     const subscribeUserLambda = new lambda.Function(this, 'subscribe-user-lambda', {
-        runtime: lambda.Runtime.NODEJS_16_X, 
+        runtime: lambda.Runtime.NODEJS_16_X,
+         timeout: Duration.seconds(29), 
         environment: {
             FILE_METADATA_TABLE_NAME: fileMetadataTableName,
             USER_SUBSCRIPTION_TABLE_NAME: userSubscriptionTableName,
         },
-        handler: 'subscribe-users.handler',
+        handler: 'subscribe-user.handler',
         code: Code.fromAsset(path.join(__dirname, 'dist')),
     });
+    userSubscriptionTable.grantReadWriteData(subscribeUserLambda);
 
     const filesResource = api.root.addResource('files');
     const fileIdResource = filesResource.addResource('{fileId}');
@@ -106,7 +115,7 @@ export class ApiStack extends Stack {
 
     filesResource.addMethod(
       'POST',
-      new apigw.LambdaIntegration(insertDataLambda, {proxy: true}),
+      new apigw.LambdaIntegration(insertFileLambda, {proxy: true}),
     );
 
     fileIdResource.addMethod(
@@ -125,8 +134,8 @@ export class ApiStack extends Stack {
       new apigw.LambdaIntegration(subscribeUserLambda, {proxy: true}),
     );
 
-    // new CfnOutput(this, 'ApiUrl', {
-    //   value: api.uri,
-    // });
+    new CfnOutput(this, 'ApiUrl', {
+      value: api.url,
+    });
   }
 }

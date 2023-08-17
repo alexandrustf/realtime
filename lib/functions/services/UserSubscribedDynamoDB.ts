@@ -17,6 +17,22 @@ export class UserSubscribedDynamoDB extends BaseDynamoDB {
     return await this.putItem(subscription);
   }
 
+  async queryUserSubscriptionsByUserId(userId: string) {
+    const USER_ID_SUBSCRIPTION_INDEX_NAME: string = process.env.USER_ID_SUBSCRIPTION_INDEX_NAME || 'UserIdSubscriptionIndex';
+
+    const params: QueryCommandInput = {
+        TableName: this.tableName,
+        IndexName: USER_ID_SUBSCRIPTION_INDEX_NAME,
+        KeyConditionExpression: "userId = :userId",
+        ExpressionAttributeValues: {
+            ":userId": { S: userId }
+        }
+    };
+
+    const response = await this.client.send(new QueryCommand(params));
+    return response.Items?.map(i => unmarshall(i));
+  }
+
   async isUserSubscribedToFile(userId: string, fileId: string) {
     const params: QueryCommandInput = {
         TableName: this.tableName,
