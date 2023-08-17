@@ -1,7 +1,7 @@
-import { DynamoDBService } from "./services/dynamoDBService";
+import { FileMetadataDynamoDB } from "./services/FileMetadataDynamoDB";
 
 const fileMetadataTableName = process.env.FILE_METADATA_TABLE_NAME || '';
-const dbService = new DynamoDBService(fileMetadataTableName);
+const dbService = new FileMetadataDynamoDB(fileMetadataTableName);
 
 exports.handler = async (event: any) => {
     const { fileId } = event.pathParameters;
@@ -15,25 +15,30 @@ exports.handler = async (event: any) => {
     }
 
     try {
+        let items;
         if (version) {
-            const items = await dbService.getItemsWithVersionGreaterThan(fileId, version);
+            items = await dbService.getItemsWithVersionGreaterThan(fileId, version);
             if (!items || items.length === 0) {
                 return {
                     statusCode: 404,
                     body: "No newer versions found"
                 };
             }
-            return {
-                statusCode: 200,
-                body: JSON.stringify(items)
-            };
         } else {
-            const items = await dbService.query("fileId = :fileId", { ":fileId": { S: fileId } });
-            return {
-                statusCode: 200,
-                body: JSON.stringify(items)
-            };
+            items = await dbService.query("fileId = :fileId", { ":fileId": { S: fileId } });
         }
+
+        const concatenatedData = items.reduce((acc, item) => acc + item.data, "");
+
+        const responseItem = {
+            fileId: fileId,
+            data: concatenatedData
+        };
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify(responseItem)
+        };
     } catch (err) {
         console.error("Error fetching file:", err);
         return {

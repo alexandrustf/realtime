@@ -1,17 +1,13 @@
-import { DynamoDBService } from "./services/dynamoDBService";
+import { uniq } from "lodash";
+import { FileMetadataDynamoDB } from "./services/FileMetadataDynamoDB";
 
-const _ = require('lodash');
 const fileMetadataTableName = process.env.FILE_METADATA_TABLE_NAME || '';
-const dbService = new DynamoDBService(fileMetadataTableName);
+const dbService = new FileMetadataDynamoDB(fileMetadataTableName);
 
 exports.handler = async () => {
     try {
-        const result: any = await dbService.scan();
-        // const result: any = await dbService.query('fileId = :fileId', {
-        //     ':fileId': fileId
-        //     }, USER_ID_SUBSCRIPTION_INDEX_NAME);
-        const items = result?.Items; // this should scan the entire dataset. might be added a GSI
-        const uniqueFileIds = _.uniq(items.map(item => item.fileId.S));
+        const items: any = await dbService.scan();
+        const uniqueFileIds = uniq(items.map(item => item.fileId));
 
         return {
             statusCode: 200,

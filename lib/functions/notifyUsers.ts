@@ -1,8 +1,8 @@
-import { DynamoDBService } from "./services/dynamoDBService";
+import { FileMetadataDynamoDB } from "./services/FileMetadataDynamoDB";
 
 const USER_SUBSCRIPTION_TABLE_NAME = process.env.USER_SUBSCRIPTION_TABLE_NAME || '';
 const USER_ID_SUBSCRIPTION_INDEX_NAME: string = process.env.USER_ID_SUBSCRIPTION_INDEX_NAME || 'UserIdSubscriptionIndex';
-const dbService = new DynamoDBService(USER_SUBSCRIPTION_TABLE_NAME);
+const dbService = new FileMetadataDynamoDB(USER_SUBSCRIPTION_TABLE_NAME);
 
 exports.handler = async (event) => {
     try {

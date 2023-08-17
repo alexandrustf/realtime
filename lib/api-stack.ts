@@ -33,36 +33,47 @@ export class ApiStack extends Stack {
             allowOrigins: ['http://localhost:3000'],
           },
       });
-    const insertDataLambda = new lambda.Function(this, 'insert-data-lambda', {
+    const insertDataLambda = new lambda.Function(this, 'insert-file-lambda', {
         runtime: lambda.Runtime.NODEJS_16_X, 
         environment: {
             FILE_METADATA_TABLE_NAME: fileMetadataTableName,
         },
-        handler: 'insert-data.handler',
+        handler: 'insert-file.handler',
         code: Code.fromAsset(path.join(__dirname, 'dist')),
     });
     importedFileMetadataTable.grantReadWriteData(insertDataLambda);
 
-    const updateDataLambda = new lambda.Function(this, 'update-data-lambda', {
+    const updateFileLambda = new lambda.Function(this, 'update-file-lambda', {
         runtime: lambda.Runtime.NODEJS_16_X, 
         environment: {
             FILE_METADATA_TABLE_NAME: fileMetadataTableName,
         },
-        handler: 'update-data.handler',
+        handler: 'update-file.handler',
         code: Code.fromAsset(path.join(__dirname, 'dist')),
     });
-    importedFileMetadataTable.grantReadWriteData(updateDataLambda);
+    importedFileMetadataTable.grantReadWriteData(updateFileLambda);
 
-    const getDataLambda = new lambda.Function(this, 'get-data-lambda', {
+    const getAllFilesLambda = new lambda.Function(this, 'get-all-files-lambda', {
+      runtime: lambda.Runtime.NODEJS_16_X, 
+      environment: {
+          FILE_METADATA_TABLE_NAME: fileMetadataTableName,
+      },
+      handler: 'get-all-files.handler',
+      code: Code.fromAsset(path.join(__dirname, 'dist')),
+    });
+    importedFileMetadataTable.grantReadData(getAllFilesLambda);
+
+    const getDataLambda = new lambda.Function(this, 'get-file-lambda', {
         runtime: lambda.Runtime.NODEJS_16_X, 
         environment: {
             FILE_METADATA_TABLE_NAME: fileMetadataTableName,
         },
-        handler: 'get-data.handler',
+        handler: 'get-file.handler',
         code: Code.fromAsset(path.join(__dirname, 'dist')),
     });
     importedFileMetadataTable.grantReadData(getDataLambda);
 
+    // Please write the lambda function for delete-data.ts as well. /files/{fileId} but only if the file was created 
     const deleteDataLambda = new lambda.Function(this, 'delete-data-lambda', {
         runtime: lambda.Runtime.NODEJS_16_X, 
         environment: {
@@ -90,7 +101,7 @@ export class ApiStack extends Stack {
     versionResource.addMethod('GET', new apigw.LambdaIntegration(getDataLambda));
     filesResource.addMethod(
       'GET',
-      new apigw.LambdaIntegration(getDataLambda, {proxy: true}),
+      new apigw.LambdaIntegration(getAllFilesLambda, {proxy: true}),
     );
 
     filesResource.addMethod(
@@ -100,7 +111,7 @@ export class ApiStack extends Stack {
 
     fileIdResource.addMethod(
       'PUT',
-      new apigw.LambdaIntegration(updateDataLambda, {proxy: true}),
+      new apigw.LambdaIntegration(updateFileLambda, {proxy: true}),
     );
 
     fileIdResource.addMethod(
@@ -108,7 +119,7 @@ export class ApiStack extends Stack {
       new apigw.LambdaIntegration(deleteDataLambda, {proxy: true}),
     );
 
-    const subscribers = api.root.addResource('subscribers');
+    const subscribers = fileIdResource.addResource('subscribers');
     subscribers.addMethod(
       'POST',
       new apigw.LambdaIntegration(subscribeUserLambda, {proxy: true}),

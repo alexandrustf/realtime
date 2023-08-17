@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "main": "delete-data.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy:api": "cd .. && rmdir /s /q dist && npx tsc && cp -R node_modules ../dist/node_modules && cd ../.. && cdk deploy ApiStack",
+    "deploy:api:windows": "rmdir /s /q \"../dist\" && npx tsc && xcopy /E /I /Q node_modules \"../dist/node_modules\" && cd ../.. && cdk deploy ApiStack && cd lib/functions",
+    "deploy:database:windows": "rmdir /s /q \"../dist\" && npx tsc && xcopy /E /I /Q node_modules \"../dist/node_modules\" && cd ../.. && cdk deploy DatabaseStack && cd lib/functions"
   },
   "author": "",
   "license": "ISC",
@@ -14,6 +17,8 @@
   },
   "description": "",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.391.0"
+    "@aws-sdk/client-dynamodb": "^3.391.0",
+    "@aws-sdk/util-dynamodb": "^3.391.0",
+    "lodash": "^4.17.21"
   }
 }

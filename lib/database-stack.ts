@@ -11,7 +11,7 @@ export class DatabaseStack extends Stack {
 
     const fileMetadataTable = new Table(this, 'FileMetadataTable', {
       partitionKey: { name: 'fileId', type: AttributeType.STRING },
-      sortKey: { name: 'version', type: AttributeType.STRING },
+      sortKey: { name: 'version', type: AttributeType.NUMBER },
       tableName: 'FileMetadata',
       stream: StreamViewType.NEW_IMAGE,  // Stream new data when an item is added
       removalPolicy: RemovalPolicy.DESTROY,
