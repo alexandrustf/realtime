@@ -25,13 +25,14 @@ exports.handler = async (event: any) => {
                 };
             }
         } else {
-            items = await dbService.query("fileId = :fileId", { ":fileId": { S: fileId } });
+            items = await dbService.query(fileId);
         }
 
         const concatenatedData = items.reduce((acc, item) => acc + item.data, "");
 
         const responseItem = {
             fileId: fileId,
+            version: items[items.length - 1].version,
             data: concatenatedData
         };
 

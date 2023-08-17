@@ -1,4 +1,4 @@
-import { DynamoDBClient, GetItemCommand, PutItemCommand, UpdateItemCommand, DeleteItemCommand, ScanCommand, QueryCommand, QueryCommandInput, UpdateItemCommandInput } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, GetItemCommand, PutItemCommand, UpdateItemCommand, DeleteItemCommand, ScanCommand, QueryCommand, QueryCommandInput, UpdateItemCommandInput, AttributeValue } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
 export class BaseDynamoDB {
@@ -59,22 +59,52 @@ export class BaseDynamoDB {
     return response.Items?.map(i => unmarshall(i));
   }
 
-  async query(keyConditionExpression, expressionAttributeValues, indexName: string | undefined = undefined) {
-    console.log("query");
+  // async query(keyConditionExpression, expressionAttributeValues, indexName: string | undefined = undefined) {
+  //   console.log("query");
+  //   const params: QueryCommandInput = {
+  //       TableName: this.tableName,
+  //       KeyConditionExpression: keyConditionExpression,
+  //       ExpressionAttributeValues: expressionAttributeValues
+  //   };
+
+  //   console.log({params});
+
+  //   if (indexName) {
+  //       params.IndexName = indexName;
+  //   }
+
+  //   const response = await this.client.send(new QueryCommand(params));
+  //   console.log(response)
+  //   return response.Items?.map(i => unmarshall(i));
+  // }
+
+  async query(fileId: string, version?: number, indexName?: string): Promise<any[] | undefined> {
+    let keyConditionExpression = "fileId = :fileId";
+    let expressionAttributeValues: { [key: string]: AttributeValue } = {
+        ":fileId": { S: fileId }
+    };
+
+    if (version !== undefined) {
+        keyConditionExpression += " AND version > :version";
+        expressionAttributeValues[":version"] = { N: version.toString() };
+    }
+
     const params: QueryCommandInput = {
         TableName: this.tableName,
         KeyConditionExpression: keyConditionExpression,
         ExpressionAttributeValues: expressionAttributeValues
     };
 
-    console.log({params});
-
     if (indexName) {
         params.IndexName = indexName;
     }
 
-    const response = await this.client.send(new QueryCommand(params));
-    console.log(response)
-    return response.Items?.map(i => unmarshall(i));
-  }
+    try {
+        const response = await this.client.send(new QueryCommand(params));
+        return response.Items?.map(i => unmarshall(i));
+    } catch (error) {
+        console.error("Error during DynamoDB query:", error);
+        throw error;
+    }
+}
 }

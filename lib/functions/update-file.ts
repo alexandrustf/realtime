@@ -15,7 +15,7 @@ exports.handler = async (event: any) => {
     }
 
     try {
-        const latestItems = await dbService.query("fileId = :fileId", { ":fileId": fileId }); // might add ScanIndexForward option
+        const latestItems = await dbService.query(fileId); // might add ScanIndexForward option
         console.log(latestItems)
         const latestVersion = latestItems && latestItems.length > 0 ? Math.max(...latestItems.map(item => item.version)) : 0; 
 
@@ -30,7 +30,7 @@ exports.handler = async (event: any) => {
 
         return {
             statusCode: 200,
-            body: "Data updated successfully"
+            body: newItem
         };
     } catch (err) {
         console.error("Error updating data:", err);

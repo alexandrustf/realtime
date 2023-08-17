@@ -10,9 +10,7 @@ exports.handler = async (event) => {
             if (record.eventName === 'INSERT') { // Only process new files
                 const fileId = record.dynamodb.NewImage.fileId.S;
 
-                const result: any = await dbService.query('fileId = :fileId', {
-                    ':fileId': fileId
-                    }, USER_ID_SUBSCRIPTION_INDEX_NAME);
+                const result: any = await dbService.query(fileId, undefined, USER_ID_SUBSCRIPTION_INDEX_NAME);
                 if(result.Items)
                     await notifyUsers(result.Items, fileId);
             }
