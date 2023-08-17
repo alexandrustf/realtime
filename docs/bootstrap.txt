@@ -1,0 +1,1 @@
+Inside the lib/functions you can on Windows, I usualy use Mac: rmdir /s /q ..\dist && npx tsc && xcopy /E /I /Q node_modules ..\dist\node_modules && cd .. && cd .. && cdk deploy ApiStack && cd lib/functions
