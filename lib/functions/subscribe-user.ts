@@ -1,8 +1,11 @@
+import { SNSService } from './services/SNSService';
 import { UserSubscribedDynamoDB } from './services/UserSubscribedDynamoDB';
 
-const userSubscriptionTableName = process.env.USER_SUBSCRIPTION_TABLE_NAME || '';
+const userSubscriptionTableName: string = process.env.USER_SUBSCRIPTION_TABLE_NAME || '';
+const SNS_TOPIC_ARN: string = process.env.SNS_TOPIC_ARN || '';
 
 const userDbService = new UserSubscribedDynamoDB(userSubscriptionTableName);
+const snsService = new SNSService(SNS_TOPIC_ARN);
 
 exports.handler = async (event: any) => {
     const { fileId } = event.pathParameters;
@@ -22,6 +25,18 @@ exports.handler = async (event: any) => {
             userId: userId,
             fileId: fileId,
         });
+
+        // If email is provided, subscribe it to the SNS topic
+        const { body } = event;
+        if(body) {
+            const input = JSON.parse(body);
+            // Similar, other protocols could be added protocols phone, SQS, eventbridge etc.
+            // This could be refactored to have an interface Subscriber which will be implemented by EmailSubscriber, SQSSubscriber etc. and will override the subscribe method
+            if (input.email && input.protocol === "email") {
+                await snsService.subscribeEmail(input.email, input.protocol);
+            }
+        }
+
 
         return {
             statusCode: 200,

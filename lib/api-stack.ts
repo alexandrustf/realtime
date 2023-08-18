@@ -1,7 +1,9 @@
 import * as apigw from 'aws-cdk-lib/aws-apigateway';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Code } from 'aws-cdk-lib/aws-lambda';
+import { Topic } from 'aws-cdk-lib/aws-sns';
 import { CfnOutput, Duration, Fn, Stack, StackProps } from 'aws-cdk-lib/core';
 import { Construct } from 'constructs';
 import path = require('path');
@@ -11,6 +13,7 @@ export class ApiStack extends Stack {
     super(scope, id, props);
     const fileMetadataTableName = Fn.importValue('FileMetadataTableName');
     const userSubscriptionTableName = Fn.importValue('UserSubscriptionTableName');
+    const importedFileTopicArn = Fn.importValue('FileUpdateTopicArn');
     const importedFileMetadataTable = Table.fromTableName(this, 'ImportedFileMetadataTable', fileMetadataTableName);
     const userSubscriptionTable = Table.fromTableName(this, 'ImportedUserSubscriptionTableName', userSubscriptionTableName);
 
@@ -102,7 +105,11 @@ export class ApiStack extends Stack {
         code: Code.fromAsset(path.join(__dirname, 'dist')),
     });
     userSubscriptionTable.grantReadWriteData(subscribeUserLambda);
-
+    subscribeUserLambda.addToRolePolicy(new PolicyStatement({
+      actions: ['sns:Subscribe'],
+      resources: [importedFileTopicArn],
+  }));
+    
     const filesResource = api.root.addResource('files');
     const fileIdResource = filesResource.addResource('{fileId}');
     fileIdResource.addMethod('GET', new apigw.LambdaIntegration(getDataLambda));

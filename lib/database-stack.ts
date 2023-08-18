@@ -53,6 +53,11 @@ export class DatabaseStack extends Stack {
 
     userSubscriptionTable.grantReadWriteData(notifyUsersLambda);
 
+    new CfnOutput(this, 'FileUpdateTopicArn', {
+      value: fileUpdateTopic.topicArn,
+      exportName: 'FileUpdateTopicArn',
+    });
+
     new CfnOutput(this, 'FileMetadataTableName', {
       value: fileMetadataTable.tableName,
       exportName: 'FileMetadataTableName',
