@@ -23,14 +23,19 @@ exports.handler = async (event: any) => {
             fileId: fileId,
             version: latestVersion + 1,
             userId: userId,
-            addedData: data
+            data: data
         };
 
         await dbService.putItem(newItem);
 
         return {
             statusCode: 200,
-            body: JSON.stringify(newItem),
+            body: JSON.stringify({
+                fileId: fileId,
+                version: latestVersion + 1,
+                userId: userId,
+                addedData: data,
+            }),
         };
     } catch (err) {
         console.error("Error updating data:", err);
