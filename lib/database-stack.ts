@@ -50,8 +50,6 @@ export class DatabaseStack extends Stack {
       startingPosition: StartingPosition.TRIM_HORIZON
     }));
     fileUpdateTopic.grantPublish(notifyUsersLambda);
-
-
     userSubscriptionTable.grantReadWriteData(notifyUsersLambda);
 
     new CfnOutput(this, 'FileUpdateTopicArn', {

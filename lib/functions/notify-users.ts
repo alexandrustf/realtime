@@ -9,13 +9,16 @@ const dbService = new UserSubscribedDynamoDB(USER_SUBSCRIPTION_TABLE_NAME);
 const snsService = new SNSService(SNS_TOPIC_ARN);
 
 exports.handler = async (event) => {
+    console.log(JSON.stringify(event));
     try {
         for (const record of event.Records) {
                 const fileId = record.dynamodb.NewImage.fileId.S;
+                const version = record.dynamodb.NewImage.version.N;
 
-                const result: any = await dbService.queryIndex(fileId, USER_ID_SUBSCRIPTION_INDEX_NAME);
-                if(result.Items)
-                    await notifyUsers(result.Items, fileId);
+                const users: any = await dbService.queryIndex(fileId, USER_ID_SUBSCRIPTION_INDEX_NAME);
+                if(users)
+                    await notifyUsers(users, fileId, version);
+                else console.log("No users to notify");
         }
     } catch (error) {
         console.error('Error processing DynamoDB stream event:', error);
@@ -23,18 +26,18 @@ exports.handler = async (event) => {
     }
 };
 
-async function notifyUsers(users, fileId) {
+async function notifyUsers(users, fileId, version) {
     console.log({users});
     for (const user of users) {  // this could be improved with Promise.all
-        console.log(`Notify user ${user.userId} about new file ${fileId}`);
+        console.log(`Notify user ${user.userId} about new file version for ${fileId} and version: ${version}`);
         
         const message = {
            fileId: fileId,
-            greeting: `Hello ${user.userId}, there's a new update for file ${fileId}. Check it out!`
+            greeting: `Hello ${user.userId}, there's a new update for for ${fileId} and version: ${version}. Check it out!`
         };
 
         try {
-            await snsService.publishMessage(`Update for file ${fileId}`, JSON.stringify(message)); 
+            await snsService.publishMessage(`Update for file ${fileId} version ${version}`, JSON.stringify(message)); 
             console.log(`Notification sent to ${user.userId} successfully.`);
         } catch (error) {
             console.error(`Failed to send notification to ${user.userId}. Error:`, error);

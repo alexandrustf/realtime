@@ -58,7 +58,10 @@ export class UserSubscribedDynamoDB extends BaseDynamoDB {
         IndexName: indexName
     };
 
+    console.log(params)
+
     const response = await this.client.send(new QueryCommand(params));
+    console.log(response)
     return response.Items?.map(i => unmarshall(i));
 }
 
