@@ -12,7 +12,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"fileId\": \"MyFile2\",\r\n    \"userId\": \"alex\",\r\n    \"data\": \"This is the beginning of this MyFile2.\"\r\n}",
+					"raw": "{\r\n    \"fileId\": \"MyFavoriteTripWithFriends\",\r\n    \"userId\": \"alex\",\r\n    \"data\": \"MyFavoriteTrip with Friends, Post here your feelings about it!\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -66,7 +66,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://m81iczegr5.execute-api.us-west-2.amazonaws.com/prod/files/someFile1",
+					"raw": "https://m81iczegr5.execute-api.us-west-2.amazonaws.com/prod/files/MyFavoriteTripWithFriends",
 					"protocol": "https",
 					"host": [
 						"m81iczegr5",
@@ -78,7 +78,7 @@
 					"path": [
 						"prod",
 						"files",
-						"someFile1"
+						"MyFavoriteTripWithFriends"
 					]
 				}
 			},
@@ -90,7 +90,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://m81iczegr5.execute-api.us-west-2.amazonaws.com/prod/files/someFile1/4",
+					"raw": "https://m81iczegr5.execute-api.us-west-2.amazonaws.com/prod/files/MyFavoriteTripWithFriends/3",
 					"protocol": "https",
 					"host": [
 						"m81iczegr5",
@@ -102,8 +102,8 @@
 					"path": [
 						"prod",
 						"files",
-						"someFile1",
-						"4"
+						"MyFavoriteTripWithFriends",
+						"3"
 					]
 				}
 			},
@@ -116,7 +116,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"userId\": \"alex\",\r\n    \"data\": \"Add to this file more!\"\r\n}",
+					"raw": "{\r\n    \"userId\": \"luigi\",\r\n    \"data\": \"I hope we will go next in Spain!\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -124,7 +124,7 @@
 					}
 				},
 				"url": {
-					"raw": "https://m81iczegr5.execute-api.us-west-2.amazonaws.com/prod/files/someFile1",
+					"raw": "https://m81iczegr5.execute-api.us-west-2.amazonaws.com/prod/files/MyFavoriteTripWithFriends",
 					"protocol": "https",
 					"host": [
 						"m81iczegr5",
@@ -136,7 +136,7 @@
 					"path": [
 						"prod",
 						"files",
-						"someFile1"
+						"MyFavoriteTripWithFriends"
 					]
 				}
 			},
@@ -182,7 +182,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"userId\": \"john\",\r\n    \"protocol\": \"email\",\r\n    \"email\": \"stefanalexandruioan@yahoo.com\"\r\n}",
+					"raw": "{\r\n    \"userId\": \"alexior\",\r\n    \"protocol\": \"email\",\r\n    \"email\": \"alex_ronaldo_72007@yahoo.com\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
