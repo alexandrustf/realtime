@@ -182,7 +182,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"userId\": \"costel\"\r\n}",
+					"raw": "{\r\n    \"userId\": \"john\",\r\n    \"protocol\": \"email\",\r\n    \"email\": \"stefanalexandruioan@yahoo.com\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
