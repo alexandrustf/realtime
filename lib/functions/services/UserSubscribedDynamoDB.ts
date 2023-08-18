@@ -48,4 +48,18 @@ export class UserSubscribedDynamoDB extends BaseDynamoDB {
     return (items && items.length > 0);
   }
 
+  async queryIndex(fileId: string, indexName: string) {
+    const params: QueryCommandInput = {
+        TableName: this.tableName,
+        KeyConditionExpression: "fileId = :fileId",
+        ExpressionAttributeValues: {
+            ":fileId": { S: fileId }
+        },
+        IndexName: indexName
+    };
+
+    const response = await this.client.send(new QueryCommand(params));
+    return response.Items?.map(i => unmarshall(i));
+}
+
 }

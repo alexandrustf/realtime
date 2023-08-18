@@ -13,7 +13,7 @@ exports.handler = async (event) => {
         for (const record of event.Records) {
                 const fileId = record.dynamodb.NewImage.fileId.S;
 
-                const result: any = await dbService.query(fileId, undefined, USER_ID_SUBSCRIPTION_INDEX_NAME);
+                const result: any = await dbService.queryIndex(fileId, USER_ID_SUBSCRIPTION_INDEX_NAME);
                 if(result.Items)
                     await notifyUsers(result.Items, fileId);
         }
@@ -25,7 +25,7 @@ exports.handler = async (event) => {
 
 async function notifyUsers(users, fileId) {
     console.log({users});
-    for (const user of users) {
+    for (const user of users) {  // this could be improved with Promise.all
         console.log(`Notify user ${user.userId} about new file ${fileId}`);
         
         const message = {
@@ -34,7 +34,7 @@ async function notifyUsers(users, fileId) {
         };
 
         try {
-            await snsService.publishMessage(`Update for file ${fileId}`, JSON.stringify(message)); // this could be improved with Promise.all
+            await snsService.publishMessage(`Update for file ${fileId}`, JSON.stringify(message)); 
             console.log(`Notification sent to ${user.userId} successfully.`);
         } catch (error) {
             console.error(`Failed to send notification to ${user.userId}. Error:`, error);

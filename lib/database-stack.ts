@@ -1,4 +1,4 @@
-import { CfnOutput, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib/core';
+import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib/core';
 import { Table, AttributeType, StreamViewType } from 'aws-cdk-lib/aws-dynamodb';
 import path = require('path');
 import { Construct } from 'constructs';
@@ -37,12 +37,13 @@ export class DatabaseStack extends Stack {
   });
     const notifyUsersLambda = new Function(this, 'notifyUsersLambda', {
       runtime: Runtime.NODEJS_16_X, 
+      timeout: Duration.minutes(5), 
       environment: {
           FILE_METADATA_TABLE_NAME: fileMetadataTable.tableName,
           USER_SUBSCRIPTION_TABLE_NAME: userSubscriptionTable.tableName,
           SNS_TOPIC_ARN: fileUpdateTopic.topicArn,
       },
-      code: Code.fromAsset(path.join(__dirname, 'functions')),
+      code: Code.fromAsset(path.join(__dirname, 'dist')),
       handler: "notify-users.handler",
     });
     notifyUsersLambda.addEventSource(new DynamoEventSource(fileMetadataTable, {
