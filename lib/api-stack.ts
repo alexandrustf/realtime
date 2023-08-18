@@ -100,6 +100,7 @@ export class ApiStack extends Stack {
         environment: {
             FILE_METADATA_TABLE_NAME: fileMetadataTableName,
             USER_SUBSCRIPTION_TABLE_NAME: userSubscriptionTableName,
+            SNS_TOPIC_ARN: importedFileTopicArn,
         },
         handler: 'subscribe-user.handler',
         code: Code.fromAsset(path.join(__dirname, 'dist')),

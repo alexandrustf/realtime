@@ -21,20 +21,19 @@ exports.handler = async (event: any) => {
     }
 
     try {
+        const { body } = event;
+        const input = JSON.parse(body);
         await userDbService.putItem({
             userId: userId,
             fileId: fileId,
+            ...input,
         });
 
         // If email is provided, subscribe it to the SNS topic
-        const { body } = event;
-        if(body) {
-            const input = JSON.parse(body);
-            // Similar, other protocols could be added protocols phone, SQS, eventbridge etc.
-            // This could be refactored to have an interface Subscriber which will be implemented by EmailSubscriber, SQSSubscriber etc. and will override the subscribe method
-            if (input.email && input.protocol === "email") {
-                await snsService.subscribeEmail(input.email, input.protocol);
-            }
+        // Similar, other protocols could be added protocols phone, SQS, eventbridge etc.
+        // This could be refactored to have an interface Subscriber which will be implemented by EmailSubscriber, SQSSubscriber etc. and will override the subscribe method
+        if (input.email && input.protocol === "email") {
+            await snsService.subscribeEmail(input.email, input.protocol);
         }
 
 
